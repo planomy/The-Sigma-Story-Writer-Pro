@@ -171,12 +171,7 @@
         }
 
         /* Paragraph Builder Styles */
-        .highlight {
-            background-color: rgba(255, 69, 0, 0.4);
-            border-radius: 3px;
-            padding: 0 2px;
-        }
-
+        .hl-example { background-color: rgba(255, 107, 36, 0.5); } /* Example-specific highlight */
         .hl-red { background-color: rgba(255, 77, 77, 0.5); }
         .hl-blue { background-color: rgba(77, 148, 255, 0.5); }
         .hl-yellow { background-color: rgba(255, 221, 87, 0.5); }
@@ -276,9 +271,15 @@
             color: #888; /* Light grey for placeholder text */
         }
         
-        .editable-div.placeholder .highlight {
-            background-color: rgba(136, 136, 136, 0.3); /* Muted highlight for placeholder */
-        }
+        /* NEW: Muted highlights for placeholder text */
+        .editable-div.placeholder .hl-red { background-color: rgba(255, 77, 77, 0.2); }
+        .editable-div.placeholder .hl-blue { background-color: rgba(77, 148, 255, 0.2); }
+        .editable-div.placeholder .hl-yellow { background-color: rgba(255, 221, 87, 0.25); }
+        .editable-div.placeholder .hl-purple { background-color: rgba(170, 102, 255, 0.2); }
+        .editable-div.placeholder .hl-green { background-color: rgba(82, 204, 82, 0.2); }
+        .editable-div.placeholder .hl-bold { font-weight: normal; } /* Bolding is too strong for a placeholder */
+        .editable-div.placeholder .hl-example { background-color: rgba(255, 107, 36, 0.25); } /* Muted example highlight */
+
 
         .stats-tracker {
             margin-bottom: 10px;
@@ -736,6 +737,8 @@
         const wordsToBold = new Set(Object.keys(wordCounts).filter(word => wordCounts[word] > 3));
 
         allDivs.forEach(div => {
+            if (div.classList.contains('placeholder')) return; // Don't re-analyze placeholders
+
             let originalText = div.innerText || div.textContent;
             
             let processedHTML = originalText.replace(/(\b[\w']+\b)|(\s+)/g, (match, word, space) => {
@@ -786,17 +789,22 @@
         const editableDivs = section.querySelectorAll('.editable-div');
 
         editableDivs.forEach(div => {
-            const text = div.innerText || div.textContent;
-            const words = text.trim().split(/\s+/).filter(word => word.length > 0);
-            totalWords += words.length;
+             if (!div.classList.contains('placeholder')) {
+                const text = div.innerText || div.textContent;
+                const words = text.trim().split(/\s+/).filter(word => word.length > 0);
+                totalWords += words.length;
+            }
         });
         
         let highlightedWordCount = 0;
         const highlightedElements = section.querySelectorAll('.hl-red, .hl-blue, .hl-yellow, .hl-purple, .hl-green');
         highlightedElements.forEach(el => {
-            const text = el.innerText || el.textContent;
-            const words = text.trim().split(/\s+/).filter(word => word.length > 0);
-            highlightedWordCount += words.length;
+            // Only count if it's not in a placeholder
+            if (!el.closest('.placeholder')) {
+                const text = el.innerText || el.textContent;
+                const words = text.trim().split(/\s+/).filter(word => word.length > 0);
+                highlightedWordCount += words.length;
+            }
         });
 
         const currentWordsSpan = section.querySelector('.current-words');
@@ -839,19 +847,18 @@
         });
     }
 
-
     document.addEventListener('DOMContentLoaded', () => {
         spinAll(); 
         updateWordCountTargets();
         populateHighlightKeys();
         
         const placeholderTexts = [
-            `Quadruple Verb:<br><span class="highlight">Climbing</span> the spiral staircase to the top of the lighthouse, Ellie <span class="highlight">secured</span> the heavy door behind her, <span class="highlight">lit</span> the beacon, and <span class="highlight">scanned</span> the horizon for incoming ships.`,
-            `Injected Verb:<br>Descending the stairs, <span class="highlight">feeling the chill of the storm seep through the walls,</span> she hesitated at the base, listening to the howl of the wind.`,
-            `Double Hand Sentence:<br><span class="highlight">With</span> a sturdy flashlight in one hand <span class="highlight">and</span> a faded tarp <span class="highlight">she grabbed</span> from an old moving box in the other, <span class="highlight">Ellie unveiled</span> the mysterious door hidden at the lighthouse's base.`,
-            `Verb Start:<br><span class="highlight">Approaching</span> the door, careful not to disturb the silence, <span class="highlight">she traced</span> her fingers along its ancient wood, <span class="highlight">feeling</span> the engraved patterns under her touch.`,
-            `TNT:<br><span class="highlight">Ellie paused</span>.`,
-            `Double Issue Verb Start:<br>Ellie, <span class="highlight">battling</span> the fierce wind that threatened to extinguish her lantern, <span class="highlight">coupled with</span> the eerie vibrations emanating from the door, <span class="highlight">pushed</span> it open, <span class="highlight">and stepped</span> into darkness.`
+            `Quadruple Verb:<br><span class="hl-example">Climbing</span> the spiral staircase to the top of the lighthouse, Ellie <span class="hl-example">secured</span> the heavy door behind her, <span class="hl-example">lit</span> the beacon, and <span class="hl-example">scanned</span> the horizon for incoming ships.`,
+            `Injected Verb:<br>Descending the stairs, <span class="hl-example">feeling the chill of the storm seep through the walls,</span> she hesitated at the base, listening to the howl of the wind.`,
+            `Double Hand Sentence:<br><span class="hl-example">With</span> a sturdy flashlight in one hand <span class="hl-example">and</span> a faded tarp <span class="hl-example">she grabbed</span> from an old moving box in the other, <span class="hl-example">Ellie unveiled</span> the mysterious door hidden at the lighthouse's base.`,
+            `Verb Start:<br><span class="hl-example">Approaching</span> the door, careful not to disturb the silence, <span class="hl-example">she traced</span> her fingers along its ancient wood, <span class="hl-example">feeling</span> the engraved patterns under her touch.`,
+            `TNT:<br><span class="hl-example">Ellie paused</span>.`,
+            `Double Issue Verb Start:<br>Ellie, <span class="hl-example">battling</span> the fierce wind that threatened to extinguish her lantern, <span class="hl-example">coupled with</span> the eerie vibrations emanating from the door, <span class="hl-example">pushed</span> it open, <span class="hl-example">and stepped</span> into darkness.`
         ];
 
         const actionDivs = document.querySelectorAll('.paragraph-section .paragraph-inputs .editable-div:first-child');
@@ -876,13 +883,13 @@
                 }
             });
         });
-
+        
         const editableDivs = document.querySelectorAll('.paragraph-inputs .editable-div');
         editableDivs.forEach(div => {
             div.addEventListener('input', scheduleAnalysis);
         });
 
-        analyzeAllText();
+        analyzeAllText(); // Run initial analysis for any pre-filled text (none in this case, but good practice)
     });
 
 </script>
