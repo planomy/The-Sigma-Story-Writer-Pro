@@ -1,0 +1,892 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Story Writer Pro</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Special+Elite&family=Roboto+Mono:wght@400;700&display=swap');
+
+        :root {
+            --bg-color: #1a1a1a;
+            --text-color: #e0e0e0;
+            --primary-color: #ff4500;
+            --border-color: #444;
+            --field-bg: #2a2a2a;
+        }
+
+        body {
+            font-family: 'Roboto Mono', monospace;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1100px;
+            background-color: var(--field-bg);
+            border: 2px solid var(--border-color);
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+        }
+
+        .tabs {
+            display: flex;
+            border-bottom: 2px solid var(--border-color);
+            margin-bottom: 20px;
+        }
+
+        .tab-button {
+            padding: 10px 20px;
+            cursor: pointer;
+            background-color: transparent;
+            border: none;
+            color: var(--text-color);
+            font-family: 'Special Elite', cursive;
+            font-size: 1.2em;
+            opacity: 0.6;
+            transition: opacity 0.3s, background-color 0.3s;
+        }
+
+        .tab-button.active {
+            opacity: 1;
+            border-bottom: 3px solid var(--primary-color);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        h1 {
+            font-family: 'Special Elite', cursive;
+            color: var(--primary-color);
+            text-align: center;
+            margin-top: 0;
+            font-size: 2em;
+            letter-spacing: 2px;
+        }
+
+        /* Roulette Styles */
+        .roulette-grid {
+            display: grid;
+            grid-template-columns: auto 1fr;
+            gap: 12px;
+            margin-bottom: 25px;
+        }
+
+        .roulette-grid strong {
+            color: var(--primary-color);
+            font-weight: 700;
+            text-align: right;
+            padding-top: 5px;
+        }
+
+        .roulette-grid span {
+            background-color: var(--bg-color);
+            padding: 5px 8px;
+            border-radius: 4px;
+            border: 1px solid var(--border-color);
+            min-height: 24px;
+            white-space: normal;
+            word-wrap: break-word;
+        }
+
+        .spin-button {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            font-family: 'Special Elite', cursive;
+            font-size: 1.5em;
+            cursor: pointer;
+            background-color: var(--primary-color);
+            color: var(--bg-color);
+            border: none;
+            border-radius: 5px;
+            margin-bottom: 25px;
+            transition: background-color 0.3s, transform 0.1s;
+        }
+
+        .spin-button:hover {
+            background-color: #ff6a3b;
+        }
+        
+        .spin-button:active {
+            transform: scale(0.98);
+        }
+
+        .actions-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 10px;
+        }
+
+        .actions-grid input {
+            width: 100%;
+            padding: 10px;
+            background-color: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            color: var(--text-color);
+            font-family: 'Roboto Mono', monospace;
+            box-sizing: border-box;
+        }
+
+        .actions-grid input::placeholder {
+            color: #666;
+        }
+
+        .copy-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .copy-button {
+            padding: 10px;
+            font-family: 'Special Elite', cursive;
+            font-size: 1.1em;
+            cursor: pointer;
+            background-color: #333;
+            color: var(--primary-color);
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+
+        .copy-button:hover {
+            background-color: #444;
+        }
+
+        /* Paragraph Builder Styles */
+        .highlight {
+            background-color: rgba(255, 69, 0, 0.4);
+            border-radius: 3px;
+            padding: 0 2px;
+        }
+
+        .hl-red { background-color: rgba(255, 77, 77, 0.5); }
+        .hl-blue { background-color: rgba(77, 148, 255, 0.5); }
+        .hl-yellow { background-color: rgba(255, 221, 87, 0.5); }
+        .hl-purple { background-color: rgba(170, 102, 255, 0.5); }
+        .hl-green { background-color: rgba(82, 204, 82, 0.5); }
+        .hl-bold { font-weight: bold; }
+
+
+        .word-count-controls {
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .word-count-controls label {
+            font-weight: bold;
+        }
+
+        .word-count-controls input {
+            width: 100px;
+            padding: 8px;
+            background-color: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            color: var(--text-color);
+            font-family: 'Roboto Mono', monospace;
+        }
+
+        .paragraph-section {
+            margin-bottom: 25px;
+            background: #222;
+            padding: 15px;
+            border-radius: 8px;
+        }
+
+        .paragraph-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 5px;
+            margin-bottom: 10px;
+        }
+
+        .paragraph-section h2 {
+            font-family: 'Special Elite', cursive;
+            color: var(--primary-color);
+            margin-top: 0;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .copy-paragraph-button {
+            background: #3a3a3a;
+            color: var(--primary-color);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            padding: 4px 10px;
+            font-size: 0.8em;
+            font-family: 'Roboto Mono', monospace;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .copy-paragraph-button:hover {
+            background: #4a4a4a;
+        }
+
+
+        .paragraph-inputs {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+        }
+
+        .paragraph-inputs .editable-div {
+            width: 100%;
+            min-height: 100px; /* Equivalent to about 4 rows */
+            padding: 10px;
+            background-color: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            color: var(--text-color);
+            font-family: 'Roboto Mono', monospace;
+            box-sizing: border-box;
+            font-size: 0.8em; /* Adjusted font size */
+        }
+        
+        .editable-div[placeholder]:empty:before {
+            content: attr(placeholder);
+            color: #666;
+            pointer-events: none;
+            display: block; /* For cursor behavior */
+        }
+        
+        .editable-div.placeholder {
+            color: #888; /* Light grey for placeholder text */
+        }
+        
+        .editable-div.placeholder .highlight {
+            background-color: rgba(136, 136, 136, 0.3); /* Muted highlight for placeholder */
+        }
+
+        .stats-tracker {
+            margin-bottom: 10px;
+            font-size: 0.9em;
+            color: #aaa;
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        .word-count-display .current-words {
+            font-weight: bold;
+            transition: color 0.3s;
+        }
+        
+        .highlight-tally-display {
+            font-size: 0.9em;
+        }
+        .highlight-tally-display small {
+            font-size: 0.8em;
+            opacity: 0.8;
+        }
+        
+        .highlight-key {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 15px;
+            align-items: center;
+            padding-top: 10px;
+            border-top: 1px solid var(--border-color);
+            justify-content: flex-end;
+        }
+        .key-item {
+            position: relative;
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            cursor: help;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .key-item.hl-bold {
+            width: auto;
+            height: auto;
+            padding: 0 5px;
+            text-align: center;
+            font-size: 0.9em;
+            border: 1px solid var(--border-color);
+        }
+
+        .key-item:hover::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 125%; /* Position above the item */
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: black;
+            color: silver;
+            border: 1px solid red;
+            padding: 8px 12px;
+            border-radius: 5px;
+            font-size: 0.75em;
+            white-space: normal; /* Allow text to wrap */
+            width: 300px; /* Control the width */
+            text-align: center;
+            z-index: 10;
+            opacity: 1;
+            visibility: visible;
+            transition: opacity 0.2s;
+        }
+
+        .key-item::after {
+            content: '';
+            position: absolute;
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="tabs">
+        <button class="tab-button active" onclick="openTab(event, 'Roulette')">Story Roulette</button>
+        <button class="tab-button" onclick="openTab(event, 'Paragraphs')">Paragraph Builder</button>
+    </div>
+
+    <!-- TAB 1: STORY ROULETTE -->
+    <div id="Roulette" class="tab-content active">
+        <h1>Sigma Story Writer Pro</h1>
+    
+        <div class="roulette-grid">
+            <strong>Name:</strong> <span id="name">...</span>
+            <strong>Age:</strong> <span id="age">...</span>
+            <strong>Hair:</strong> <span id="hair">...</span>
+            <strong>Build:</strong> <span id="build">...</span>
+            <strong>Feature:</strong> <span id="feature">...</span>
+            <strong>Background:</strong> <span id="background">...</span>
+            <strong>Occupation:</strong> <span id="occupation">...</span>
+            <strong>Setting:</strong> <span id="setting">...</span>
+            <strong>Problem:</strong> <span id="problem">...</span>
+        </div>
+
+        <button class="spin-button" onclick="spinAll()">Flick the Switch</button>
+
+        <div class="actions-grid">
+            <input type="text" id="action1" placeholder="Action 1">
+            <input type="text" id="action2" placeholder="Action 2">
+            <input type="text" id="action3" placeholder="Action 3">
+            <input type="text" id="action4" placeholder="Action 4">
+            <input type="text" id="action5" placeholder="Action 5">
+            <input type="text" id="action6" placeholder="Action 6">
+            <input type="text" id="complication" placeholder="COMPLICATION">
+            <input type="text" id="climax" placeholder="CLIMAX">
+            <input type="text" id="resolution" placeholder="RESOLUTION">
+        </div>
+        <div class="copy-buttons">
+             <button class="copy-button" onclick="copyOutline()">Copy Entire Story Outline</button>
+             <button class="copy-button" onclick="copyIdeas()">Copy Just My Ideas</button>
+        </div>
+
+    </div>
+
+    <!-- TAB 2: PARAGRAPH BUILDER -->
+    <div id="Paragraphs" class="tab-content">
+        <h1>Paragraph Builder</h1>
+        <div class="word-count-controls">
+            <label for="total-word-count">Total Word Count:</label>
+            <input type="number" id="total-word-count" value="600" oninput="updateWordCountTargets()">
+        </div>
+        <div class="paragraph-sections-container">
+            <!-- WHO -->
+            <div class="paragraph-section">
+                <div class="paragraph-header">
+                    <h2>Who</h2>
+                    <button class="copy-paragraph-button" onclick="copyParagraph(this)">Copy WHO Paragraph</button>
+                </div>
+                <div class="stats-tracker">
+                    <span class="word-count-display">Word Count: <span class="current-words">0</span> / <span class="target-words">0</span></span>
+                    <span class="highlight-tally-display">Highlights: <span class="highlight-percent">0</span>% <small>(aim for Y4-6 &lt;50%, Y7-9 &lt;40%, Y10-12 &lt;35%)</small></span>
+                </div>
+                <div class="paragraph-inputs">
+                    <div class="editable-div" contenteditable="true"></div>
+                    <div class="editable-div" contenteditable="true" placeholder="Description..."></div>
+                    <div class="editable-div" contenteditable="true" placeholder="Story..."></div>
+                </div>
+                <div class="highlight-key"></div>
+            </div>
+            <!-- WHERE -->
+            <div class="paragraph-section">
+                <div class="paragraph-header">
+                    <h2>Where</h2>
+                    <button class="copy-paragraph-button" onclick="copyParagraph(this)">Copy WHERE Paragraph</button>
+                </div>
+                 <div class="stats-tracker">
+                    <span class="word-count-display">Word Count: <span class="current-words">0</span> / <span class="target-words">0</span></span>
+                    <span class="highlight-tally-display">Highlights: <span class="highlight-percent">0</span>% <small>(aim for Y4-6 &lt;50%, Y7-9 &lt;40%, Y10-12 &lt;35%)</small></span>
+                </div>
+                <div class="paragraph-inputs">
+                    <div class="editable-div" contenteditable="true"></div>
+                    <div class="editable-div" contenteditable="true" placeholder="Description..."></div>
+                    <div class="editable-div" contenteditable="true" placeholder="Story..."></div>
+                </div>
+                <div class="highlight-key"></div>
+            </div>
+            <!-- WHAT -->
+            <div class="paragraph-section">
+                <div class="paragraph-header">
+                    <h2>What</h2>
+                    <button class="copy-paragraph-button" onclick="copyParagraph(this)">Copy WHAT Paragraph</button>
+                </div>
+                 <div class="stats-tracker">
+                    <span class="word-count-display">Word Count: <span class="current-words">0</span> / <span class="target-words">0</span></span>
+                    <span class="highlight-tally-display">Highlights: <span class="highlight-percent">0</span>% <small>(aim for Y4-6 &lt;50%, Y7-9 &lt;40%, Y10-12 &lt;35%)</small></span>
+                </div>
+                <div class="paragraph-inputs">
+                    <div class="editable-div" contenteditable="true"></div>
+                    <div class="editable-div" contenteditable="true" placeholder="Description..."></div>
+                    <div class="editable-div" contenteditable="true" placeholder="Story..."></div>
+                </div>
+                <div class="highlight-key"></div>
+            </div>
+             <!-- TENSION -->
+             <div class="paragraph-section">
+                <div class="paragraph-header">
+                    <h2>Tension</h2>
+                    <button class="copy-paragraph-button" onclick="copyParagraph(this)">Copy TENSION Paragraph</button>
+                </div>
+                 <div class="stats-tracker">
+                    <span class="word-count-display">Word Count: <span class="current-words">0</span> / <span class="target-words">0</span></span>
+                    <span class="highlight-tally-display">Highlights: <span class="highlight-percent">0</span>% <small>(aim for Y4-6 &lt;50%, Y7-9 &lt;40%, Y10-12 &lt;35%)</small></span>
+                </div>
+                <div class="paragraph-inputs">
+                    <div class="editable-div" contenteditable="true"></div>
+                    <div class="editable-div" contenteditable="true" placeholder="Atmosphere..."></div>
+                    <div class="editable-div" contenteditable="true" placeholder="Story..."></div>
+                </div>
+                <div class="highlight-key"></div>
+            </div>
+            <!-- COMPLICATION -->
+            <div class="paragraph-section">
+                <div class="paragraph-header">
+                    <h2>Complication</h2>
+                    <button class="copy-paragraph-button" onclick="copyParagraph(this)">Copy COMPLICATION Paragraph</button>
+                </div>
+                 <div class="stats-tracker">
+                    <span class="word-count-display">Word Count: <span class="current-words">0</span> / <span class="target-words">0</span></span>
+                    <span class="highlight-tally-display">Highlights: <span class="highlight-percent">0</span>% <small>(aim for Y4-6 &lt;50%, Y7-9 &lt;40%, Y10-12 &lt;35%)</small></span>
+                </div>
+                <div class="paragraph-inputs">
+                    <div class="editable-div" contenteditable="true"></div>
+                    <div class="editable-div" contenteditable="true" placeholder="Atmosphere..."></div>
+                    <div class="editable-div" contenteditable="true" placeholder="Story..."></div>
+                </div>
+                <div class="highlight-key"></div>
+            </div>
+            <!-- RESOLUTION -->
+            <div class="paragraph-section">
+                <div class="paragraph-header">
+                    <h2>Resolution</h2>
+                    <button class="copy-paragraph-button" onclick="copyParagraph(this)">Copy RESOLUTION Paragraph</button>
+                </div>
+                 <div class="stats-tracker">
+                    <span class="word-count-display">Word Count: <span class="current-words">0</span> / <span class="target-words">0</span></span>
+                    <span class="highlight-tally-display">Highlights: <span class="highlight-percent">0</span>% <small>(aim for Y4-6 &lt;50%, Y7-9 &lt;40%, Y10-12 &lt;35%)</small></span>
+                </div>
+                <div class="paragraph-inputs">
+                    <div class="editable-div" contenteditable="true"></div>
+                    <div class="editable-div" contenteditable="true" placeholder="Atmosphere..."></div>
+                    <div class="editable-div" contenteditable="true" placeholder="Story..."></div>
+                </div>
+                <div class="highlight-key"></div>
+            </div>
+        </div>
+        <div class="copy-buttons" style="grid-template-columns: 1fr; margin-top: 20px;">
+            <button id="copy-story-button" class="copy-button" onclick="copyFullStory()">Copy Entire Story</button>
+       </div>
+    </div>
+    <textarea id="copy-helper" style="opacity:0; position:absolute; pointer-events:none; top: -9999px; left: -9999px;"></textarea>
+</div>
+
+<script>
+    const data = {
+        names: ["Sloane", "Corbin", "Wren", "August", "Tate", "Eliza", "Jude", "Cleo", "Hayes", "Iris", "Silas", "Maeve", "Lachlan", "Phoebe", "Ronan", "Stella", "Rhys", "Thea", "Asher", "Esme", "Flynn", "Audrey", "Gideon", "Clara", "Milo", "Cora", "Beckett", "Willa", "Graham", "Hazel", "Callum", "Rose", "Jasper", "Ivy", "Emmett", "Faye", "Owen", "Alice", "Finn", "Nora", "Declan", "Luna", "Killian", "Isla", "Reid", "Eleanor", "Caleb", "Genevieve", "Sawyer", "Charlotte"],
+        hairColors: ["jet black", "mousey brown", "dishwater blonde", "strawberry blonde", "salt-and-pepper", "shock of white", "deep auburn", "warm chestnut", "honey blonde", "sandy", "dark brown", "light brown", "golden blonde", "fiery red", "silver gray", "raven", "brunette", "ash brown", "platinum blonde", "copper", "cinnamon", "mahogany", "caramel", "toffee", "chocolate brown", "espresso", "steel gray", "champagne blonde", "bronze", "honey", "tawny", "russet", "sorrel", "umber", "pecan", "walnut", "dark chocolate", "pale blonde", "ash blonde", "natural red", "burgundy", "cherry red", "ginger", "flaxen", "dirty blonde", "icy blonde", "silver", "gunmetal", "pepper", "snowy white"],
+        hairTypes: ["messy bun", "tight ponytail", "slicked back", "unruly curls", "perfectly straight", "buzz cut", "shaggy mop", "bedhead", "frizzy", "wispy bangs", "blunt cut", "layered", "braided", "dreadlocks", "undercut", "quiff", "pompadour", "crew cut", "fade", "bob", "lob", "pixie cut", "mullet", "side part", "center part", "spiky", "gelled", "windswept", "tousled", "wavy", "ringlets", "coiled", "kinky", "afro", "top knot", "cornrows", "flat top", "bowl cut", "curtains", "feathered", "flipped", "crimped", "permed", "thinning", "balding patch", "receding hairline", "widow's peak", "thick", "fine", "greasy"],
+        builds: ["slender", "stocky", "average", "athletic", "muscular", "lanky", "pudgy", "stout", "wiry", "bony", "scrawny", "lean", "broad-shouldered", "pear-shaped", "apple-shaped", "hourglass", "petite", "towering", "compact", "solid", "well-built", "trim", "fit", "toned", "chubby", "plump", "portly", "husky", "burly", "robust", "hardy", "strong", "frail", "delicate", "slight", "gaunt", "emaciated", "gangly", "leggy", "rangy", "strapping", "brawny", "sinewy", "ripped", "shredded", "buff", "jacked", "sculpted", "chiseled", "defined"],
+        features: ["a prominent birthmark on their cheek", "a nervous twitch in their eye", "constantly fidgeting with a ring", "a small scar above their lip", "a gap between their front teeth", "one ear that's slightly larger", "a habit of chewing their thumbnail", "unusually bright, intense eyes", "a soft, melodic voice", "a loud, booming laugh", "a crooked nose", "a dimple in their chin", "a tattoo peeking from their collar", "a tendency to talk with their hands", "a slight lisp", "calloused hands", "a perfectly straight posture", "a slouch", "a thoughtful frown line", "a perpetually raised eyebrow", "a warm, genuine smile", "a cold, distant stare", "a habit of humming softly", "a tendency to mispronounce a common word", "a distinctive cologne or perfume", "a preference for wearing a specific color", "a chipped tooth", "a piercing they often touch", "a way of tucking their hair back", "a habit of looking down when they talk", "a very direct way of speaking", "a tendency to trail off mid-sentence", "a unique pattern of freckles", "a way of wrinkling their nose when they think", "a very still, composed demeanor", "a restless energy", "a very faint accent", "a habit of quoting old movies", "a tendency to doodle on napkins", "a lucky charm they always carry", "a very particular way of tying their shoes", "a worn-out watch", "a very neat, precise handwriting", "a messy, sprawling handwriting", "a preference for tea over coffee", "a strange allergy", "a recurring dream they like to talk about", "a fear of a common animal", "a surprisingly deep knowledge of a niche subject", "a favorite park bench"],
+        backgrounds: ["used to be a local news reporter", "grew up in a traveling circus family", "is a former competitive chess player", "volunteers at an animal shelter every weekend", "is trying to pay off a large family debt", "inherited a failing bookstore", "is the black sheep of a wealthy family", "is secretly a gifted painter", "once won a hot-dog eating contest", "is rebuilding their life after a major failure", "has a long-lost sibling they've never met", "is trying to live up to a parent's legacy", "is haunted by a past mistake", "is a surprisingly good poker player", "is writing a novel in their spare time", "is the caretaker for an elderly relative", "is a former high school sports star", "is saving up for a trip around the world", "has an estranged child", "is a recovering addict", "is part of a neighborhood watch", "organizes a local book club", "is a foster parent", "is a conspiracy theorist", "is a hopeless romantic", "is a deep cynic", "is a very picky eater", "is a terrible cook", "is a meticulous planner", "is chronically disorganized", "is a morning person", "is a night owl", "is a homebody", "is an adventure seeker", "is a minimalist", "is a hoarder", "is deeply religious", "is an atheist", "is a political activist", "is completely apolitical", "is a local historian", "is a bird watcher", "is a talented musician", "is tone-deaf", "is a great dancer", "has two left feet", "is a gifted public speaker", "is terrified of public speaking", "is a skilled negotiator", "is easily taken advantage of"],
+        occupations: ["accountant", "baker", "carpenter", "dog groomer", "electrician", "florist", "graphic designer", "history teacher", "IT technician", "journalist", "kindergarten teacher", "librarian", "mechanic", "nurse", "optometrist", "plumber", "quantum physicist (unemployed)", "real estate agent", "sociology professor", "translator", "urban planner", "veterinarian", "web developer", "x-ray technician", "yoga instructor", "zookeeper", "architect", "bartender", "chef", "dentist", "engineer", "firefighter", "geologist", "hairstylist", "illustrator", "janitor", "landscaper", "masseuse", "notary", "office manager", "paramedic", "receptionist", "salesperson", "therapist", "undertaker", "valet", "waiter", "biologist", "chemist", "data analyst"],
+        settings: ["a waiting room at the DMV", "a laundromat at midnight", "the last open checkout lane at a grocery store", "a public library's quietest section", "a crowded city bus during rush hour", "a hospital cafeteria", "a community garden", "a post office with a long line", "a self-storage facility", "a dog park", "a local coffee shop on a rainy day", "an all-you-can-eat buffet", "a hardware store's paint section", "a car repair shop's waiting area", "a jury duty waiting room", "a bowling alley on league night", "a small-town diner", "a public swimming pool", "a bookstore's bargain bin section", "a parent-teacher conference", "a local museum's least popular exhibit", "a park bench overlooking a pond", "a retirement home's common room", "a rooftop overlooking the city", "an office breakroom", "a commuter train platform", "a wedding reception for a distant relative", "a funeral for a stranger", "a yard sale", "a farmers' market", "a blood donation center", "an airport gate for a delayed flight", "a tourist information center", "a public speaking class", "a cooking class", "a pottery studio", "a bingo hall", "a flea market", "a public transit station", "a university lecture hall", "a fast-food restaurant", "a movie theater lobby", "a gas station", "a hotel lobby", "a courthouse hallway", "a record store", "a comic book shop", "a tattoo parlor", "a pawn shop", "a taxi cab"],
+        problems: ["has to confront a friend who owes them a lot of money", "is about to be evicted from their apartment", "just lost their car keys", "is responsible for a coworker's mistake", "has a terrible secret they're afraid will come out", "needs to make a difficult apology", "is stuck in a job they hate", "is dealing with a family member's illness", "has to give a speech they're not prepared for", "is being blackmailed over something minor", "is deeply in debt", "is a witness to a minor crime", "has to break up with a long-term partner", "is struggling with a creative block", "has discovered a partner is cheating", "is trying to quit a bad habit", "is failing a class they need to graduate", "is being pressured to do something unethical at work", "has to fire a longtime employee", "is dealing with a noisy neighbor", "has lost a sentimental piece of jewelry", "is trying to get a refund for a faulty product", "is stuck caring for a pet they don't like", "has a moral dilemma about finding a lost wallet", "is being unfairly blamed for something", "has to choose between two important commitments", "is lonely and trying to make new friends", "is dealing with a mid-life crisis", "is worried about a child's behavior", "is trying to mediate a fight between two friends", "is facing a major career decision", "is trying to reconnect with an estranged family member", "is dealing with the fallout of a lie", "has to have a difficult conversation with their parents", "is struggling with imposter syndrome", "is trying to stick to a budget", "is dealing with an unreasonable boss", "is trying to help a friend who won't accept help", "is faced with an unexpected bill", "has a pest infestation in their home", "is dealing with a bureaucratic nightmare", "is trying to finish a project on a tight deadline", "is dealing with a personal health scare", "is trying to get their driver's license renewed", "is trying to teach an older relative how to use technology", "is running for a position on a local committee", "is trying to organize a surprise party that keeps going wrong", "is dealing with identity theft", "is trying to sell something online with difficult buyers", "is trying to assemble complicated furniture"]
+    };
+
+    // --- LIVE ANALYSIS DATA ---
+    const analysisWords = {
+        passive: ['was', 'were', 'is', 'are', 'am', 'be', 'been', 'being', 'have', 'has', 'had', 'get', 'got', 'getting', 'gotten', 'hasn’t', 'haven’t', 'hadn’t', 'isn’t', 'aren’t', 'wasn’t', 'weren’t'],
+        badStarts: ['The', 'It', 'A', 'An', 'He', 'She', 'His', 'Her', 'This', 'These', 'Those', 'They', 'There', 'Then', 'I', 'My', 'We', 'Our'],
+        stop: ['and', 'but', 'or', 'so', 'because', 'of', 'to', 'for', 'at', 'in', 'on', 'by', 'from', 'if', 'than', 'as', 'that', 'can', 'did', 'should', 'could', 'would', 'many'],
+        filler: ['very', 'really', 'just', 'only', 'kind of', 'sort of', 'maybe', 'perhaps', 'quite', 'rather', 'somehow', 'somewhat', 'suddenly', 'finally', 'basically', 'actually', 'literally', 'totally', 'completely', 'absolutely', 'obviously', 'definitely', 'clearly', 'simply', 'truly', 'quickly', 'slowly'],
+        basic: ['big', 'small', 'good', 'bad', 'happy', 'sad', 'angry', 'nice', 'mean', 'fun', 'boring', 'fast', 'slow', 'hot', 'cold', 'smart', 'dumb', 'easy', 'hard', 'pretty', 'ugly', 'old', 'young', 'man', 'woman', 'boy', 'girl', 'thing', 'stuff', 'friend', 'child', 'people', 'house', 'car', 'dog', 'cat', 'run', 'walk', 'talk', 'look', 'say', 'go', 'do', 'make', 'see', 'give', 'take', 'find', 'know', 'think', 'want', 'like', 'love']
+    };
+    const allAnalysisWords = new Set([].concat(...Object.values(analysisWords).flat()).map(w => w.toLowerCase()));
+
+
+    // --- TAB AND ROULETTE LOGIC (UNCHANGED) ---
+    function openTab(evt, tabName) {
+        let i, tabcontent, tabbuttons;
+        tabcontent = document.getElementsByClassName("tab-content");
+        for (i = 0; i < tabcontent.length; i++) {
+            tabcontent[i].style.display = "none";
+        }
+        tabbuttons = document.getElementsByClassName("tab-button");
+        for (i = 0; i < tabbuttons.length; i++) {
+            tabbuttons[i].className = tabbuttons[i].className.replace(" active", "");
+        }
+        document.getElementById(tabName).style.display = "block";
+        evt.currentTarget.className += " active";
+    }
+
+    function getRandomElement(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+
+    function getRandomAge() {
+        const min = 20, max = 95;
+        const age = Math.floor(Math.random() * (max - min + 1)) + min;
+        const lowerBound = Math.floor(age / 5) * 5;
+        return `${lowerBound}-${lowerBound + 4}`;
+    }
+
+    function rouletteEffect(elementId, dataArray, isAge = false, isHair = false) {
+        const element = document.getElementById(elementId);
+        let spinCount = 0;
+        const maxSpins = 15;
+        const interval = setInterval(() => {
+            if (isAge) { element.textContent = getRandomAge(); } 
+            else if (isHair) { element.textContent = `${getRandomElement(data.hairColors)}, ${getRandomElement(data.hairTypes)}`; }
+            else { element.textContent = getRandomElement(dataArray); }
+            if (++spinCount > maxSpins) { clearInterval(interval); }
+        }, 70);
+    }
+
+    function spinAll() {
+        rouletteEffect('name', data.names);
+        rouletteEffect('age', null, true);
+        rouletteEffect('hair', null, false, true);
+        rouletteEffect('build', data.builds);
+        rouletteEffect('feature', data.features);
+        rouletteEffect('background', data.backgrounds);
+        rouletteEffect('occupation', data.occupations);
+        rouletteEffect('setting', data.settings);
+        rouletteEffect('problem', data.problems);
+    }
+    
+    function copyWithFeedback(button, text) {
+        const helper = document.getElementById('copy-helper');
+        helper.value = text;
+        helper.select();
+        document.execCommand('copy');
+        const originalText = button.textContent;
+        button.textContent = 'Copied!';
+        setTimeout(() => { button.textContent = originalText; }, 2000);
+    }
+
+    function getIdeasText() {
+        let text = '';
+        ['action1', 'action2', 'action3', 'action4', 'action5', 'action6', 'complication', 'climax', 'resolution'].forEach(id => {
+            const el = document.getElementById(id);
+            text += `${el.placeholder}: ${el.value}\n`;
+        });
+        return text.trim();
+    }
+
+    function copyOutline() {
+        let text = `Name: ${document.getElementById('name').textContent}\n` +
+                   `Age: ${document.getElementById('age').textContent}\n` +
+                   `Hair: ${document.getElementById('hair').textContent}\n` +
+                   `Build: ${document.getElementById('build').textContent}\n` +
+                   `Feature: ${document.getElementById('feature').textContent}\n` +
+                   `Background: ${document.getElementById('background').textContent}\n` +
+                   `Occupation: ${document.getElementById('occupation').textContent}\n` +
+                   `Setting: ${document.getElementById('setting').textContent}\n` +
+                   `Problem: ${document.getElementById('problem').textContent}\n\n`;
+        text += getIdeasText();
+        copyWithFeedback(event.currentTarget, text);
+    }
+
+    function copyIdeas() {
+        copyWithFeedback(event.currentTarget, getIdeasText());
+    }
+
+    // --- PARAGRAPH BUILDER LOGIC ---
+    function copyParagraph(buttonEl) {
+        const section = buttonEl.closest('.paragraph-section');
+        const inputs = section.querySelectorAll('.editable-div');
+        const paragraph = Array.from(inputs).map(div => (div.innerText || div.textContent).trim().replace(/(\r\n|\n|\r)/gm, " ")).filter(t => t).join(' ');
+        copyWithFeedback(buttonEl, paragraph);
+    }
+
+    function copyFullStory() {
+        let fullText = '';
+        document.querySelectorAll('#Paragraphs .paragraph-section').forEach(section => {
+            const title = section.querySelector('h2').textContent;
+            fullText += `--- ${title.toUpperCase()} ---\n`;
+            const inputs = section.querySelectorAll('.editable-div');
+            const paragraph = Array.from(inputs).map(div => (div.innerText || div.textContent).trim().replace(/(\r\n|\n|\r)/gm, " ")).filter(t => t).join(' ');
+            fullText += `${paragraph}\n`;
+        });
+        copyWithFeedback(document.getElementById('copy-story-button'), fullText.trim());
+    }
+
+    function updateWordCountTargets() {
+        const totalWords = parseInt(document.getElementById('total-word-count').value, 10) || 0;
+        const targetPerSection = Math.floor(totalWords / 6);
+        document.querySelectorAll('.target-words').forEach(span => {
+            span.textContent = targetPerSection;
+        });
+        document.querySelectorAll('.paragraph-section').forEach(updateSectionStats);
+    }
+
+    // --- CORE ANALYSIS AND HIGHLIGHTING LOGIC ---
+
+    let analysisTimeout;
+    function scheduleAnalysis() {
+        clearTimeout(analysisTimeout);
+        analysisTimeout = setTimeout(analyzeAllText, 500); // Debounce for 500ms
+    }
+
+    function getCaretPosition(element) {
+        let position = 0;
+        const selection = window.getSelection();
+        if (selection.rangeCount > 0) {
+            const range = selection.getRangeAt(0);
+            const preCaretRange = range.cloneRange();
+            preCaretRange.selectNodeContents(element);
+            preCaretRange.setEnd(range.endContainer, range.endOffset);
+            position = preCaretRange.toString().length;
+        }
+        return position;
+    }
+
+    function setCaretPosition(element, position) {
+        let charIndex = 0;
+        const range = document.createRange();
+        range.setStart(element, 0);
+        range.collapse(true);
+        const nodeStack = [element];
+        let node, foundStart = false;
+        
+        while (!foundStart && (node = nodeStack.pop())) {
+            if (node.nodeType === 3) { // Text node
+                const nextCharIndex = charIndex + node.length;
+                if (!foundStart && position >= charIndex && position <= nextCharIndex) {
+                    range.setStart(node, position - charIndex);
+                    foundStart = true;
+                }
+                charIndex = nextCharIndex;
+            } else {
+                let i = node.childNodes.length;
+                while (i--) {
+                    nodeStack.push(node.childNodes[i]);
+                }
+            }
+        }
+        const sel = window.getSelection();
+        sel.removeAllRanges();
+        sel.addRange(range);
+    }
+    
+    function analyzeAllText() {
+        const activeEl = document.activeElement;
+        let savedPos = null;
+
+        if (activeEl && activeEl.classList.contains('editable-div')) {
+            savedPos = getCaretPosition(activeEl);
+        }
+
+        const container = document.querySelector('.paragraph-sections-container');
+        const allDivs = Array.from(container.querySelectorAll('.editable-div'));
+        let allText = '';
+        allDivs.forEach(div => allText += (div.innerText || div.textContent) + '\n');
+        
+        const wordCounts = {};
+        const words = allText.match(/\b[\w']+\b/g) || [];
+        words.forEach(word => {
+            const lowerWord = word.toLowerCase();
+            if (!allAnalysisWords.has(lowerWord)) {
+                wordCounts[lowerWord] = (wordCounts[lowerWord] || 0) + 1;
+            }
+        });
+        const wordsToBold = new Set(Object.keys(wordCounts).filter(word => wordCounts[word] > 3));
+
+        allDivs.forEach(div => {
+            let originalText = div.innerText || div.textContent;
+            
+            let processedHTML = originalText.replace(/(\b[\w']+\b)|(\s+)/g, (match, word, space) => {
+                if (word) {
+                    const lowerWord = word.toLowerCase();
+                    let classNames = [];
+                     if (wordsToBold.has(lowerWord)) classNames.push('hl-bold');
+
+                    if (analysisWords.passive.includes(lowerWord) || lowerWord.endsWith("n't") || /’(m|s|re|ve|d)$/.test(lowerWord)) {
+                        classNames.push('hl-red');
+                    } else if (analysisWords.filler.includes(lowerWord) || analysisWords.filler.includes(lowerWord.replace(/ /g, ''))) {
+                        classNames.push('hl-purple');
+                    } else if (analysisWords.stop.includes(lowerWord)) {
+                        classNames.push('hl-yellow');
+                    } else if (analysisWords.basic.includes(lowerWord)) {
+                        classNames.push('hl-green');
+                    }
+                    
+                    return classNames.length > 0 ? `<span class="${classNames.join(' ')}">${word}</span>` : word;
+                }
+                return space || match;
+            });
+            
+            processedHTML = processedHTML.replace(/(^|[\.\?!]\s*|<br>|<br\s*\/?>\s*)(\b\w+\b)/gi, (match, prefix, word) => {
+                if (analysisWords.badStarts.map(w => w.toLowerCase()).includes(word.toLowerCase())) {
+                     if (word.includes('<span')) return match;
+                    return `${prefix}<span class="hl-blue">${word}</span>`;
+                }
+                return match;
+            });
+
+            if(div.innerHTML !== processedHTML) {
+                 div.innerHTML = processedHTML;
+            }
+        });
+
+        if (activeEl && activeEl.classList.contains('editable-div') && savedPos !== null) {
+            if (document.body.contains(activeEl)) {
+                setCaretPosition(activeEl, savedPos);
+            }
+        }
+
+        document.querySelectorAll('.paragraph-section').forEach(updateSectionStats);
+    }
+
+    function updateSectionStats(section) {
+        let totalWords = 0;
+        const editableDivs = section.querySelectorAll('.editable-div');
+
+        editableDivs.forEach(div => {
+            const text = div.innerText || div.textContent;
+            const words = text.trim().split(/\s+/).filter(word => word.length > 0);
+            totalWords += words.length;
+        });
+        
+        let highlightedWordCount = 0;
+        const highlightedElements = section.querySelectorAll('.hl-red, .hl-blue, .hl-yellow, .hl-purple, .hl-green');
+        highlightedElements.forEach(el => {
+            const text = el.innerText || el.textContent;
+            const words = text.trim().split(/\s+/).filter(word => word.length > 0);
+            highlightedWordCount += words.length;
+        });
+
+        const currentWordsSpan = section.querySelector('.current-words');
+        const targetWords = parseInt(section.querySelector('.target-words').textContent, 10) || 0;
+        currentWordsSpan.textContent = totalWords;
+
+        if (targetWords > 0) {
+            const lowerBound = targetWords * 0.9;
+            const upperBound = targetWords * 1.1;
+            if (totalWords > upperBound) currentWordsSpan.style.color = '#ff4d4d'; // Red
+            else if (totalWords >= lowerBound) currentWordsSpan.style.color = '#4dff4d'; // Green
+            else currentWordsSpan.style.color = 'inherit';
+        } else {
+             currentWordsSpan.style.color = 'inherit';
+        }
+        
+        const percent = totalWords > 0 ? Math.round((highlightedWordCount / totalWords) * 100) : 0;
+        section.querySelector('.highlight-percent').textContent = percent;
+    }
+
+    function populateHighlightKeys() {
+        const keyData = [
+            { class: 'hl-red', "data-tooltip": "Passive Words: Forms of 'to be', 'to have', 'to get'. Try using stronger, more active verbs." },
+            { class: 'hl-blue', "data-tooltip": "Weak Sentence Start: Avoid starting with common words like 'The', 'It'. Try starting with an action." },
+            { class: 'hl-yellow', "data-tooltip": "Stop Words: Common 'glue' words like 'and', 'but', 'of'. Use them sparingly." },
+            { class: 'hl-purple', "data-tooltip": "Filler Words: Words like 'very', 'really', 'just'. These often weaken your statement. Try removing them." },
+            { class: 'hl-green', "data-tooltip": "Basic Vocabulary: Words like 'good', 'big', 'said'. Challenge yourself to find more descriptive synonyms." },
+            { class: 'hl-bold', "data-tooltip": "Repeated Word: Used more than 3 times. Consider a synonym for variety.", text: 'Bold' }
+        ];
+
+        document.querySelectorAll('.highlight-key').forEach(keyContainer => {
+            keyContainer.innerHTML = ''; // Clear existing
+            keyData.forEach(item => {
+                const keyEl = document.createElement('span');
+                keyEl.className = `key-item ${item.class}`;
+                keyEl.setAttribute('data-tooltip', item['data-tooltip']);
+                if (item.text) keyEl.textContent = item.text;
+                keyContainer.appendChild(keyEl);
+            });
+        });
+    }
+
+
+    document.addEventListener('DOMContentLoaded', () => {
+        spinAll(); 
+        updateWordCountTargets();
+        populateHighlightKeys();
+        
+        const placeholderTexts = [
+            `Quadruple Verb:<br><span class="highlight">Climbing</span> the spiral staircase to the top of the lighthouse, Ellie <span class="highlight">secured</span> the heavy door behind her, <span class="highlight">lit</span> the beacon, and <span class="highlight">scanned</span> the horizon for incoming ships.`,
+            `Injected Verb:<br>Descending the stairs, <span class="highlight">feeling the chill of the storm seep through the walls,</span> she hesitated at the base, listening to the howl of the wind.`,
+            `Double Hand Sentence:<br><span class="highlight">With</span> a sturdy flashlight in one hand <span class="highlight">and</span> a faded tarp <span class="highlight">she grabbed</span> from an old moving box in the other, <span class="highlight">Ellie unveiled</span> the mysterious door hidden at the lighthouse's base.`,
+            `Verb Start:<br><span class="highlight">Approaching</span> the door, careful not to disturb the silence, <span class="highlight">she traced</span> her fingers along its ancient wood, <span class="highlight">feeling</span> the engraved patterns under her touch.`,
+            `TNT:<br><span class="highlight">Ellie paused</span>.`,
+            `Double Issue Verb Start:<br>Ellie, <span class="highlight">battling</span> the fierce wind that threatened to extinguish her lantern, <span class="highlight">coupled with</span> the eerie vibrations emanating from the door, <span class="highlight">pushed</span> it open, <span class="highlight">and stepped</span> into darkness.`
+        ];
+
+        const actionDivs = document.querySelectorAll('.paragraph-section .paragraph-inputs .editable-div:first-child');
+        actionDivs.forEach((div, index) => {
+            const placeholderHTML = placeholderTexts[index];
+            
+            // Set initial state
+            div.innerHTML = placeholderHTML;
+            div.classList.add('placeholder');
+
+            div.addEventListener('focus', () => {
+                if (div.classList.contains('placeholder')) {
+                    div.innerHTML = '';
+                    div.classList.remove('placeholder');
+                }
+            });
+
+            div.addEventListener('blur', () => {
+                if ((div.innerText || div.textContent).trim() === '') {
+                    div.innerHTML = placeholderHTML;
+                    div.classList.add('placeholder');
+                }
+            });
+        });
+
+        const editableDivs = document.querySelectorAll('.paragraph-inputs .editable-div');
+        editableDivs.forEach(div => {
+            div.addEventListener('input', scheduleAnalysis);
+        });
+
+        analyzeAllText();
+    });
+
+</script>
+
+</body>
+</html>
+
